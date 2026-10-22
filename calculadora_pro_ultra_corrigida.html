@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Calculadora Pro Ultra</title>
+    <style>
+/* ===== RESET & BASE ===== */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* Light Theme */
+    --bg-primary: #f0f2f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e8eaed;
+    --text-primary: #1a1a2e;
+    --text-secondary: #4a4a6a;
+    --text-muted: #8888aa;
+    
+    --accent-primary: #6c5ce7;
+    --accent-secondary: #a29bfe;
+    --accent-hover: #5b4bd4;
+    
+    --operator-bg: #fdcb6e;
+    --operator-text: #2d3436;
+    --operator-hover: #ffb830;
+    
+    --equals-bg: #00b894;
+    --equals-text: #ffffff;
+    --equals-hover: #00a381;
+    
+    --function-bg: #dfe6e9;
+    --function-text: #2d3436;
+    --function-hover: #c8d1d6;
+    
+    --key-bg: #ffffff;
+    --key-text: #2d3436;
+    --key-hover: #f8f9fa;
+    --key-active: #eee;
+    
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.12);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.16);
+    
+    --border-radius: 16px;
+    --border-radius-sm: 12px;
+    --border-radius-xs: 8px;
+    
+    --transition: all 0.2s ease;
+}
+
+body.dark-theme {
+    --bg-primary: #0a0a1a;
+    --bg-secondary: #16162a;
+    --bg-tertiary: #1e1e3a;
+    --text-primary: #eaeaff;
+    --text-secondary: #b0b0d0;
+    --text-muted: #6a6a9a;
+    
+    --accent-primary: #7c6ff7;
+    --accent-secondary: #a29bfe;
+    --accent-hover: #9d8ff9;
+    
+    --operator-bg: #ffa502;
+    --operator-text: #1a1a2e;
+    --operator-hover: #ffb700;
+    
+    --equals-bg: #00d2d3;
+    --equals-text: #1a1a2e;
+    --equals-hover: #00ebe0;
+    
+    --function-bg: #2a2a4a;
+    --function-text: #c8c8ff;
+    --function-hover: #3a3a5a;
+    
+    --key-bg: #1e1e3a;
+    --key-text: #eaeaff;
+    --key-hover: #2a2a50;
+    --key-active: #252545;
+    
+    --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 20px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+}
+
+html, body {
+    height: 100%;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+/* ===== THEME TOGGLE ===== */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.btn-icon {
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+}
+
+.btn-icon:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-md);
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* ===== APP CONTAINER ===== */
+.app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    max-width: 480px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.app-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo i {
+    font-size: 1.4rem;
+    color: var(--accent-primary);
+}
+
+.logo h1 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.logo span {
+    color: var(--accent-primary);
+}
+
+.header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ===== CALCULATOR ===== */
+.calculator {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    margin: 0;
+    overflow: hidden;
+}
+
+/* ===== DISPLAY ===== */
+.display-container {
+    padding: 24px 20px 20px;
+    background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+    position: relative;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.memory-indicator {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--accent-primary);
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.memory-indicator.active {
+    opacity: 1;
+}
+
+.mode-indicators {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    display: flex;
+    gap: 6px;
+}
+
+.indicator {
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: var(--bg-primary);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.indicator.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.expression {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    text-align: right;
+    min-height: 28px;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+}
+
+.result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2.8rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+    transition: var(--transition);
+    word-break: break-all;
+    line-height: 1.2;
+}
+
+.preview {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: right;
+    min-height: 20px;
+    opacity: 0.7;
+}
+
+/* ===== TABS ===== */
+.tabs {
+    display: flex;
+    padding: 0 16px;
+    gap: 4px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    border-radius: 8px 8px 0 0;
+    position: relative;
+}
+
+.tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 2px;
+    background: var(--accent-primary);
+    transition: width 0.3s;
+}
+
+.tab-btn.active::after {
+    width: 60%;
+}
+
+.tab-btn.active {
+    color: var(--accent-primary);
+}
+
+.tab-btn:hover {
+    background: var(--bg-tertiary);
+}
+
+/* ===== KEYPAD ===== */
+.keypad {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 12px;
+    gap: 12px;
+}
+
+/* Memory Row */
+.memory-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+}
+
+.mem-btn {
+    padding: 8px 4px;
+    border: none;
+    background: var(--function-bg);
+    color: var(--function-text);
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 500;
+    border-radius: var(--border-radius-xs);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.mem-btn:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* Key Layout */
+.calc-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.extra-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.sci-keys {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+/* Keys */
+.key {
+    height: 64px;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.number-key {
+    background: var(--key-bg);
+    color: var(--key-text);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.number-key:hover {
+    background: var(--key-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-sm);
+}
+
+.number-key:active {
+    background: var(--key-active);
+    transform: translateY(0);
+}
+
+.operator-key {
+    background: var(--operator-bg);
+    color: var(--operator-text);
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(253, 203, 110, 0.3);
+}
+
+.operator-key:hover {
+    background: var(--operator-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(253, 203, 110, 0.4);
+}
+
+.equals-key {
+    background: var(--equals-bg);
+    color: var(--equals-text);
+    font-weight: 700;
+    font-size: 1.4rem;
+    box-shadow: 0 2px 4px rgba(0, 184, 148, 0.3);
+}
+
+.equals-key:hover {
+    background: var(--equals-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 184, 148, 0.4);
+}
+
+.function-key {
+    background: var(--function-bg);
+    color: var(--function-text);
+    font-size: 1rem;
+}
+
+.function-key:hover {
+    background: var(--function-hover);
+    transform: translateY(-1px);
+}
+
+.wide {
+    grid-column: span 2;
+}
+
+/* Scientific Keys */
+.sci-key {
+    height: 52px;
+    background: var(--function-bg);
+    color: var(--accent-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.sci-key:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* Extra Keys */
+.extra-grid .key {
+    height: 52px;
+    font-size: 0.9rem;
+}
+
+.extra-grid .operator-key {
+    height: unset;
+}
+
+/* Tab Content */
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== PANELS (History, Converter, Programmer) ===== */
+.panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 500;
+    display: none;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.panel-overlay.open {
+    display: flex;
+    opacity: 1;
+}
+
+.side-panel {
+    width: 320px;
+    max-width: 90vw;
+    background: var(--bg-secondary);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.panel-overlay.open .side-panel {
+    transform: translateX(0);
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.panel-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.close-panel {
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.close-panel:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+/* History Panel */
+.panel-actions {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.btn-clear-history {
+    width: 100%;
+    padding: 8px;
+    border: none;
+    background: transparent;
+    color: #e74c3c;
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-radius: var(--border-radius-xs);
+    transition: var(--transition);
+}
+
+.btn-clear-history:hover {
+    background: rgba(231, 76, 60, 0.1);
+}
+
+.history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.history-item {
+    padding: 12px 16px;
+    border-radius: var(--border-radius-xs);
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 4px;
+}
+
+.history-item:hover {
+    background: var(--bg-tertiary);
+}
+
+.history-expression {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.history-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.history-time {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Converter Panel */
+.converter-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 4px;
+    border-bottom: 1px solid var(--bg-tertiary);
+}
+
+.conv-tab {
+    flex: 1;
+    min-width: calc(50% - 4px);
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.75rem;
+    cursor: pointer;
+    border-radius: var(--border-radius-xs);
+    transition: var(--transition);
+}
+
+.conv-tab.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.converter-body {
+    flex: 1;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.converter-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.converter-input-group label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.converter-input-group input {
+    padding: 12px;
+    border: 2px solid var(--bg-tertiary);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: var(--border-radius-sm);
+    outline: none;
+    transition: var(--transition);
+}
+
+.converter-input-group input:focus {
+    border-color: var(--accent-primary);
+}
+
+.converter-input-group select {
+    padding: 10px 12px;
+    border: 2px solid var(--bg-tertiary);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    outline: none;
+}
+
+.convert-swap {
+    align-self: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--accent-primary);
+    color: white;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.convert-swap:hover {
+    transform: scale(1.1);
+}
+
+/* Programmer Panel */
+.programmer-display {
+    padding: 16px;
+    background: var(--bg-tertiary);
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+
+.prog-expression {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: right;
+    min-height: 20px;
+}
+
+.prog-result {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+.base-buttons {
+    display: flex;
+    padding: 8px;
+    gap: 4px;
+}
+
+.base-btn {
+    flex: 1;
+    padding: 8px;
+    border: none;
+    background: var(--bg-tertiary);
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: var(--border-radius-xs);
+    transition: var(--transition);
+}
+
+.base-btn.active {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.prog-keys {
+    padding: 8px;
+}
+
+.prog-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+}
+
+.prog-key {
+    height: 48px;
+    border: none;
+    background: var(--key-bg);
+    color: var(--key-text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: var(--border-radius-xs);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.prog-key:hover {
+    background: var(--key-hover);
+}
+
+.op-key {
+    background: var(--function-bg);
+    color: var(--accent-secondary);
+    font-weight: 600;
+}
+
+.op-key:hover {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.equals-prog-key {
+    background: var(--equals-bg);
+    color: var(--equals-text);
+    font-weight: 700;
+}
+
+.bitwise-results {
+    padding: 12px;
+    border-top: 1px solid var(--bg-tertiary);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.bit-item {
+    text-align: center;
+}
+
+.bit-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+}
+
+.bit-value {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 2px;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 480px) {
+    .app-container {
+        max-width: 100%;
+    }
+    
+    .result {
+        font-size: 2.4rem;
+    }
+    
+    .key {
+        height: 58px;
+        font-size: 1.15rem;
+    }
+    
+    .sci-key {
+        height: 48px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.key:active {
+    animation: pulse 0.1s ease;
+}
+
+.result.animate {
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error state */
+.result.error {
+    color: #e74c3c;
+    animation: shake 0.5s ease;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Empty history */
+.empty-history {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+}
+
+.empty-history i {
+    font-size: 2.5rem;
+    margin-bottom: 12px;
+    display: block;
+}
+
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <button id="themeBtn" class="btn-icon" title="Alternar tema">
+            <i class="fas fa-moon"></i>
+        </button>
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <i class="fas fa-calculator"></i>
+                <h1>Calc<span>Pro</span></h1>
+            </div>
+            <div class="header-actions">
+                <button id="historyBtn" class="btn-icon" title="Histórico">
+                    <i class="fas fa-clock-rotate-left"></i>
+                </button>
+                <button id="convertBtn" class="btn-icon" title="Conversor de Unidades">
+                    <i class="fas fa-right-left"></i>
+                </button>
+                <button id="programmerBtn" class="btn-icon" title="Modo Programador">
+                    <i class="fas fa-code"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Calculator -->
+        <main class="calculator">
+            <!-- Display -->
+            <div class="display-container">
+                <div class="memory-indicator" id="memoryIndicator">M</div>
+                <div class="mode-indicators">
+                    <span id="degRadIndicator" class="indicator active">DEG</span>
+                    <span id="modeLabel" class="indicator">BÁSICA</span>
+                </div>
+                <div class="expression" id="expression"></div>
+                <div class="result" id="result">0</div>
+                <div class="preview" id="preview"></div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="basic">Básica</button>
+                <button class="tab-btn" data-tab="scientific">Científica</button>
+                <button class="tab-btn" data-tab="extra">Extra</button>
+            </div>
+
+            <!-- Keypad -->
+            <div class="keypad">
+                <!-- Memory Row -->
+                <div class="memory-row" id="memoryRow">
+                    <button class="mem-btn" data-action="mc"><i class="fas faeraser"></i>MC</button>
+                    <button class="mem-btn" data-action="mr"><i class="fas fa-redo"></i>MR</button>
+                    <button class="mem-btn" data-action="m+"><i class="fas fa-plus"></i>M+</button>
+                    <button class="mem-btn" data-action="m-"><i class="fas fa-minus"></i>M-</button>
+                    <button class="mem-btn" data-action="ms"><i class="fas fa-save"></i>MS</button>
+                </div>
+
+                <!-- Scientific Tab -->
+                <div class="tab-content" id="scientificContent">
+                    <div class="sci-keys">
+                        <button class="key sci-key" data-action="deg-rad" data-value="toggle">DRG</button>
+                        <button class="key sci-key" data-action="sin">sin</button>
+                        <button class="key sci-key" data-action="cos">cos</button>
+                        <button class="key sci-key" data-action="tan">tan</button>
+                        <button class="key sci-key" data-action="log">log</button>
+                        <button class="key sci-key" data-action="ln">ln</button>
+                        <button class="key sci-key" data-action="exp">eˣ</button>
+                        <button class="key sci-key" data-action="10x">10ˣ</button>
+                        <button class="key sci-key" data-action="inv">1/x</button>
+                        <button class="key sci-key" data-action="square">x²</button>
+                        <button class="key sci-key" data-action="cube">x³</button>
+                        <button class="key sci-key" data-action="power">xʸ</button>
+                        <button class="key sci-key" data-action="sqrt">√x</button>
+                        <button class="key sci-key" data-action="cbrt">∛x</button>
+                        <button class="key sci-key" data-action="nthroot">ⁿ√x</button>
+                        <button class="key sci-key" data-action="fact">x!</button>
+                        <button class="key sci-key" data-action="pi">π</button>
+                        <button class="key sci-key" data-action="e">e</button>
+                        <button class="key sci-key" data-action="abs">|x|</button>
+                        <button class="key sci-key" data-action="mod">mod</button>
+                    </div>
+                </div>
+
+                <!-- Basic Tab -->
+                <div class="tab-content active" id="basicContent">
+                    <div class="calc-grid">
+                        <!-- Row 1 -->
+                        <button class="key function-key" data-action="clear">AC</button>
+                        <button class="key function-key" data-action="toggle-sign">+/−</button>
+                        <button class="key function-key" data-action="percent">%</button>
+                        <button class="key operator-key" data-action="divide">÷</button>
+
+                        <!-- Row 2 -->
+                        <button class="key number-key" data-value="7">7</button>
+                        <button class="key number-key" data-value="8">8</button>
+                        <button class="key number-key" data-value="9">9</button>
+                        <button class="key operator-key" data-action="multiply">×</button>
+
+                        <!-- Row 3 -->
+                        <button class="key number-key" data-value="4">4</button>
+                        <button class="key number-key" data-value="5">5</button>
+                        <button class="key number-key" data-value="6">6</button>
+                        <button class="key operator-key" data-action="subtract">−</button>
+
+                        <!-- Row 4 -->
+                        <button class="key number-key" data-value="1">1</button>
+                        <button class="key number-key" data-value="2">2</button>
+                        <button class="key number-key" data-value="3">3</button>
+                        <button class="key operator-key" data-action="add">+</button>
+
+                        <!-- Row 5 -->
+                        <button class="key number-key wide" data-value="0">0</button>
+                        <button class="key number-key" data-value=".">.</button>
+                        <button class="key equals-key" data-action="calculate">=</button>
+                    </div>
+                </div>
+
+                <!-- Extra Tab -->
+                <div class="tab-content" id="extraContent">
+                    <div class="extra-grid">
+                        <button class="key function-key" data-action="paren-open">(</button>
+                        <button class="key function-key" data-action="paren-close">)</button>
+                        <button class="key function-key" data-action="backspace"><i class="fas fa-delete-left"></i></button>
+                        <button class="key function-key" data-action="constant-e">e</button>
+
+                        <button class="key function-key" data-action="factorial">n!</button>
+                        <button class="key function-key" data-action="percent-of">% of</button>
+                        <button class="key function-key" data-action="reciprocal">¹/x</button>
+                        <button class="key operator-key" data-action="divide">÷</button>
+
+                        <button class="key function-key" data-action="sqr-root">√</button>
+                        <button class="key function-key" data-action="cbrt-root">∛</button>
+                        <button class="key function-key" data-action="pow2">x²</button>
+                        <button class="key function-key" data-action="pow3">x³</button>
+
+                        <button class="key function-key" data-action="pow">xʸ</button>
+                        <button class="key function-key" data-action="10pow">10ˣ</button>
+                        <button class="key function-key" data-action="exp">eˣ</button>
+                        <button class="key function-key" data-action="abs-val">|x|</button>
+
+                        <button class="key function-key" data-action="log10">log</button>
+                        <button class="key function-key" data-action="natural-log">ln</button>
+                        <button class="key function-key" data-action="sinh">sinh</button>
+                        <button class="key function-key" data-action="cosh">cosh</button>
+
+                        <button class="key function-key" data-action="tanh">tanh</button>
+                        <button class="key function-key" data-action="atan">atan</button>
+                        <button class="key function-key" data-action="asin">asin</button>
+                        <button class="key function-key" data-action="acos">acos</button>
+
+                        <button class="key function-key" data-action="permutation">nPr</button>
+                        <button class="key function-key" data-action="combination">nCr</button>
+                        <button class="key function-key" data-action="floor">⌊x⌋</button>
+                        <button class="key function-key" data-action="ceil">⌈x⌉</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- History Panel -->
+    <div class="panel-overlay" id="historyOverlay">
+        <aside class="side-panel history-panel" id="historyPanel">
+            <div class="panel-header">
+                <h3><i class="fas fa-clock-rotate-left"></i> Histórico</h3>
+                <button class="close-panel" id="closeHistory"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="panel-actions">
+                <button class="btn-clear-history" id="clearHistory"><i class="fas fa-trash"></i> Limpar</button>
+            </div>
+            <div class="history-list" id="historyList"></div>
+        </aside>
+    </div>
+
+    <!-- Converter Panel -->
+    <div class="panel-overlay" id="converterOverlay">
+        <aside class="side-panel converter-panel" id="converterPanel">
+            <div class="panel-header">
+                <h3><i class="fas fa-right-left"></i> Conversor de Unidades</h3>
+                <button class="close-panel" id="closeConverter"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="converter-tabs">
+                <button class="conv-tab active" data-category="length">📏 Comprimento</button>
+                <button class="conv-tab" data-category="weight">⚖️ Peso</button>
+                <button class="conv-tab" data-category="temperature">🌡️ Temperatura</button>
+                <button class="conv-tab" data-category="area">📐 Área</button>
+                <button class="conv-tab" data-category="volume">💧 Volume</button>
+                <button class="conv-tab" data-category="speed">🏎️ Velocidade</button>
+                <button class="conv-tab" data-category="data">💾 Dados</button>
+            </div>
+            <div class="converter-body">
+                <div class="converter-input-group">
+                    <label>De:</label>
+                    <input type="number" id="fromValue" value="1">
+                    <select id="fromUnit"></select>
+                </div>
+                <button class="convert-swap" id="swapUnits"><i class="fas fa-arrow-down-up"></i></button>
+                <div class="converter-input-group">
+                    <label>Para:</label>
+                    <input type="number" id="toValue" readonly>
+                    <select id="toUnit"></select>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Programmer Mode Overlay -->
+    <div class="panel-overlay" id="programmerOverlay">
+        <aside class="side-panel programmer-panel" id="programmerPanel">
+            <div class="panel-header">
+                <h3><i class="fas fa-code"></i> Modo Programador</h3>
+                <button class="close-panel" id="closeProgrammer"><i class="fas fa-xmark"></i></button>
+            </div>
+            <div class="programmer-display" id="progDisplay">
+                <div class="prog-expression" id="progExpression"></div>
+                <div class="prog-result" id="progResult">0</div>
+            </div>
+            <div class="base-buttons">
+                <button class="base-btn active" data-base="DEC">DEC</button>
+                <button class="base-btn" data-base="HEX">HEX</button>
+                <button class="base-btn" data-base="OCT">OCT</button>
+                <button class="base-btn" data-base="BIN">BIN</button>
+            </div>
+            <div class="prog-keys">
+                <div class="prog-grid">
+                    <button class="prog-key" data-value="A">A</button>
+                    <button class="prog-key" data-value="B">B</button>
+                    <button class="prog-key" data-value="C">C</button>
+                    <button class="prog-key op-key" data-action="prog-op" data-op="AND">&</button>
+
+                    <button class="prog-key" data-value="D">D</button>
+                    <button class="prog-key" data-value="E">E</button>
+                    <button class="prog-key" data-value="F">F</button>
+                    <button class="prog-key op-key" data-action="prog-op" data-op="OR">|</button>
+
+                    <button class="prog-key" data-action="prog-clear">C</button>
+                    <button class="prog-key" data-value="0">0</button>
+                    <button class="prog-key" data-value="1">1</button>
+                    <button class="prog-key op-key" data-action="prog-op" data-op="XOR">^</button>
+
+                    <button class="prog-key" data-action="prog-back"><i class="fas fa-delete-left"></i></button>
+                    <button class="prog-key" data-value="2">2</button>
+                    <button class="prog-key" data-value="3">3</button>
+                    <button class="prog-key op-key" data-action="prog-op" data-op="NOT">¬</button>
+
+                    <button class="prog-key" data-action="prog-shift-left"><<</button>
+                    <button class="prog-key" data-value="4">4</button>
+                    <button class="prog-key" data-value="5">5</button>
+                    <button class="prog-key op-key" data-action="prog-op" data-op="SHL">≪</button>
+
+                    <button class="prog-key" data-action="prog-shift-right">>></button>
+                    <button class="prog-key" data-value="6">6</button>
+                    <button class="prog-key" data-value="7">7</button>
+                    <button class="prog-key op-key" data-action="prog-op" data-op="SHR">≫</button>
+
+                    <button class="prog-key" data-action="prog-mod">MOD</button>
+                    <button class="prog-key" data-value="8">8</button>
+                    <button class="prog-key" data-value="9">9</button>
+                    <button class="prog-key equals-prog-key" data-action="prog-calc">=</button>
+                </div>
+            </div>
+            <div class="bitwise-results" id="bitwiseResults">
+                <div class="bit-item">
+                    <span class="bit-label">BIN</span>
+                    <span class="bit-value" id="binValue">0</span>
+                </div>
+                <div class="bit-item">
+                    <span class="bit-label">OCT</span>
+                    <span class="bit-value" id="octValue">0</span>
+                </div>
+                <div class="bit-item">
+                    <span class="bit-label">DEC</span>
+                    <span class="bit-value" id="decValue">0</span>
+                </div>
+                <div class="bit-item">
+                    <span class="bit-label">HEX</span>
+                    <span class="bit-value" id="hexValue">0</span>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+// =============================================
+// CALCULADORA PRO ULTRA - Motor Principal
+// =============================================
+
+class Calculator {
+    constructor() {
+        // Estado principal
+        this.currentValue = '0';
+        this.previousValue = '';
+        this.operator = null;
+        this.expression = '';
+        this.memory = 0;
+        try {
+            const savedHistory = JSON.parse(localStorage.getItem('calcHistory') || '[]');
+            this.history = Array.isArray(savedHistory) ? savedHistory : [];
+        } catch (e) {
+            this.history = [];
+            localStorage.removeItem('calcHistory');
+        }
+        this.isNewInput = true;
+        this.degRad = true; // true = DEG, false = RAD
+        this.bracketCount = 0;
+        
+        // Programador
+        this.progValue = 0;
+        this.progBase = 'DEC';
+        this.progExpression = '';
+        
+        // Conversor
+        this.converterCategory = 'length';
+        
+        // Elementos DOM
+        this.resultEl = document.getElementById('result');
+        this.expressionEl = document.getElementById('expression');
+        this.previewEl = document.getElementById('preview');
+        this.memoryIndicator = document.getElementById('memoryIndicator');
+        this.degRadIndicator = document.getElementById('degRadIndicator');
+        this.modeLabel = document.getElementById('modeLabel');
+        
+        this.init();
+    }
+    
+    init() {
+        this.bindEvents();
+        this.renderHistory();
+        this.updateDisplay();
+        this.setupConverter();
+    }
+    
+    bindEvents() {
+        // Usa event delegation para capturar cliques nas teclas
+        // Filtra pelas teclas visíveis na aba atual
+        const keypad = document.querySelector('.keypad');
+        keypad.addEventListener('click', (e) => {
+            const target = e.target.closest('.key');
+            if (!target) return;
+
+            const value = target.dataset.value;
+            const action = target.dataset.action;
+
+            // Só processa se o botão estiver dentro da aba ativa
+            const tabContent = target.closest('.tab-content.active');
+            if (!tabContent && !target.closest('.memory-row')) return;
+
+            // Se for da memória, ignora aqui (tratado separadamente)
+            if (target.closest('.memory-row')) return;
+
+            if (value) {
+                this.handleNumber(value);
+            } else if (action) {
+                this.handleAction(action);
+            }
+        });
+        
+        // Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+        });
+        
+        // Theme toggle
+        document.getElementById('themeBtn').addEventListener('click', () => this.toggleTheme());
+        
+        // Painéis
+        document.getElementById('historyBtn').addEventListener('click', () => this.openPanel('history'));
+        document.getElementById('convertBtn').addEventListener('click', () => this.openPanel('converter'));
+        document.getElementById('programmerBtn').addEventListener('click', () => this.openPanel('programmer'));
+        
+        document.getElementById('closeHistory').addEventListener('click', () => this.closePanel('history'));
+        document.getElementById('closeConverter').addEventListener('click', () => this.closePanel('converter'));
+        document.getElementById('closeProgrammer').addEventListener('click', () => this.closePanel('programmer'));
+        
+        document.getElementById('clearHistory').addEventListener('click', () => this.clearHistory());
+        
+        // Converter events
+        document.querySelectorAll('.conv-tab').forEach(tab => {
+            tab.addEventListener('click', () => this.changeConverterCategory(tab.dataset.category));
+        });
+        
+        document.getElementById('fromValue').addEventListener('input', () => this.convertUnits());
+        document.getElementById('fromUnit').addEventListener('change', () => this.convertUnits());
+        document.getElementById('toUnit').addEventListener('change', () => this.convertUnits());
+        document.getElementById('swapUnits').addEventListener('click', () => this.swapUnits());
+        
+        // Programmer events
+        document.querySelectorAll('.base-btn').forEach(btn => {
+            btn.addEventListener('click', () => this.changeBase(btn.dataset.base));
+        });
+        
+        document.querySelectorAll('.prog-key').forEach(btn => {
+            btn.addEventListener('click', () => this.handleProgKey(btn));
+        });
+        
+        // Overlay clicks (fechar painéis ao clicar fora)
+        document.querySelectorAll('.panel-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    const panelId = overlay.id.replace('Overlay', '');
+                    this.closePanel(panelId);
+                }
+            });
+        });
+        
+        // Keyboard support
+        document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+    }
+    
+    // ===== DISPLAY =====
+    updateDisplay() {
+        // Formata o número para exibição
+        let displayValue = this.formatDisplay(this.currentValue);
+        this.resultEl.textContent = displayValue;
+        this.expressionEl.textContent = this.expression;
+    }
+    
+    formatDisplay(value) {
+        if (value === '' || value === '-') return '0';
+        
+        // Se está digitando (contém ponto no final ou é parte da expressão)
+        if (typeof value === 'string' && (value.endsWith('.') || value.includes('.'))) {
+            const parts = value.split('.');
+            parts[0] = Number(parts[0]).toLocaleString('pt-BR');
+            return parts.join(',');
+        }
+        
+        const num = parseFloat(value);
+        if (isNaN(num)) return value;
+        
+        // Números muito grandes ou pequenos usam notação científica
+        if (Math.abs(num) > 999999999999 || (Math.abs(num) < 0.0000001 && num !== 0)) {
+            return num.toExponential(6);
+        }
+        
+        // Limita casas decimais
+        const str = num.toString();
+        if (str.length > 15) {
+            return parseFloat(num.toPrecision(12)).toString();
+        }
+        
+        return num.toLocaleString('pt-BR', { maximumFractionDigits: 10 });
+    }
+    
+    previewCalculation() {
+        // Preview em tempo real quando o usuário digita operador
+    }
+    
+    // ===== NÚMEROS =====
+    handleNumber(value) {
+        // Limpa erro se existir
+        this.resultEl.classList.remove('error');
+        
+        if (this.isNewInput) {
+            this.currentValue = value === '.' ? '0.' : value;
+            this.isNewInput = false;
+        } else {
+            // Evita múltiplos pontos decimais
+            if (value === '.' && this.currentValue.includes('.')) return;
+            
+            // Se o valor atual é "0" e não é ponto, substitui
+            if (this.currentValue === '0' && value !== '.') {
+                this.currentValue = value;
+            } else {
+                this.currentValue += value;
+            }
+        }
+        
+        this.updateDisplay();
+        this.calculatePreview();
+    }
+    
+    calculatePreview() {
+        if (!this.operator || this.previousValue === '') {
+            this.previewEl.textContent = '';
+            return;
+        }
+        
+        try {
+            const prev = parseFloat(this.previousValue);
+            const current = parseFloat(this.currentValue);
+            let result = this.compute(prev, current, this.operator);
+            
+            if (!isNaN(result) && isFinite(result)) {
+                this.previewEl.textContent = '= ' + result.toLocaleString('pt-BR', { maximumFractionDigits: 10 });
+            } else {
+                this.previewEl.textContent = '';
+            }
+        } catch (e) {
+            this.previewEl.textContent = '';
+        }
+    }
+    
+    // ===== OPERADORES BÁSICOS =====
+    handleAction(action) {
+        switch (action) {
+            case 'add':
+            case 'subtract':
+            case 'multiply':
+            case 'divide':
+                this.handleOperator(action);
+                break;
+            case 'calculate':
+                this.calculate();
+                break;
+            case 'clear':
+                this.clear();
+                break;
+            case 'toggle-sign':
+                this.toggleSign();
+                break;
+            case 'percent':
+                this.percent();
+                break;
+            case 'backspace':
+                this.backspace();
+                break;
+            case 'paren-open':
+                this.addParenthesis('(');
+                break;
+            case 'paren-close':
+                this.addParenthesis(')');
+                break;
+            default:
+                this.handleScientific(action);
+        }
+    }
+    
+    handleOperator(op) {
+        if (this.operator && !this.isNewInput) {
+            this.calculate(true);
+        }
+        
+        this.previousValue = this.currentValue;
+        this.operator = op;
+        this.expression = `${this.formatDisplay(this.previousValue)} ${this.getOperatorSymbol(op)}`;
+        this.isNewInput = true;
+        this.updateDisplay();
+        this.calculatePreview();
+    }
+    
+    getOperatorSymbol(op) {
+        const symbols = {
+            'add': '+',
+            'subtract': '−',
+            'multiply': '×',
+            'divide': '÷'
+        };
+        return symbols[op] || op;
+    }
+    
+    compute(a, b, op) {
+        switch (op) {
+            case 'add': return a + b;
+            case 'subtract': return a - b;
+            case 'multiply': return a * b;
+            case 'divide': 
+                if (b === 0) throw new Error('Divisão por zero!');
+                return a / b;
+            case 'power': return Math.pow(a, b);
+            case 'nthroot': return Math.pow(a, 1/b);
+            case 'mod': return a % b;
+            default: throw new Error('Operação inválida');
+        }
+    }
+    
+    calculate(chained = false) {
+        if (!this.operator || this.previousValue === '') {
+            if (!chained) {
+                this.addHistory(`${this.formatDisplay(this.currentValue)}`, this.currentValue);
+            }
+            return;
+        }
+        
+        try {
+            const prev = parseFloat(this.previousValue);
+            const current = parseFloat(this.currentValue);
+            const result = this.compute(prev, current, this.operator);
+            
+            if (isNaN(result) || !isFinite(result)) {
+                throw new Error('Resultado inválido');
+            }
+            
+            // Constrói a expressão completa
+            const fullExpr = `${this.formatDisplay(this.previousValue)} ${this.getOperatorSymbol(this.operator)} ${this.formatDisplay(this.currentValue)}`;
+            
+            // Arredonda para evitar erros de ponto flutuante
+            const rounded = Math.round(result * 1e12) / 1e12;
+            
+            this.resultEl.classList.remove('animate');
+            void this.resultEl.offsetWidth; // Trigger reflow
+            this.resultEl.classList.add('animate');
+            
+            this.currentValue = rounded.toString();
+            this.expression = chained ? fullExpr : fullExpr + ' =';
+            
+            if (!chained) {
+                this.addHistory(fullExpr, rounded);
+            }
+            
+            this.previousValue = '';
+            this.operator = null;
+            this.isNewInput = true;
+            this.previewEl.textContent = '';
+            this.updateDisplay();
+            
+        } catch (error) {
+            this.resultEl.textContent = 'Erro';
+            this.resultEl.classList.add('error');
+            setTimeout(() => {
+                this.currentValue = '0';
+                this.updateDisplay();
+                this.resultEl.classList.remove('error');
+            }, 1500);
+        }
+    }
+    
+    // ===== FUNÇÕES CIENTÍFICAS =====
+    handleScientific(action) {
+        const value = parseFloat(this.currentValue);
+        let result;
+        
+        try {
+            switch (action) {
+                // Funções trigonométricas
+                case 'sin':
+                    result = Math.sin(this.degRadToRadians(value));
+                    break;
+                case 'cos':
+                    result = Math.cos(this.degRadToRadians(value));
+                    break;
+                case 'tan':
+                    result = Math.tan(this.degRadToRadians(value));
+                    break;
+                case 'asin':
+                    result = this.radiansToDeg(Math.asin(value));
+                    break;
+                case 'acos':
+                    result = this.radiansToDeg(Math.acos(value));
+                    break;
+                case 'atan':
+                    result = this.radiansToDeg(Math.atan(value));
+                    break;
+                
+                // Hiperbólicas
+                case 'sinh':
+                    result = Math.sinh(value);
+                    break;
+                case 'cosh':
+                    result = Math.cosh(value);
+                    break;
+                case 'tanh':
+                    result = Math.tanh(value);
+                    break;
+                
+                // Logaritmos
+                case 'log':
+                    if (value <= 0) throw new Error('Log inválido');
+                    result = Math.log10(value);
+                    break;
+                case 'ln':
+                    if (value <= 0) throw new Error('Ln inválido');
+                    result = Math.log(value);
+                    break;
+                case 'natural-log':
+                    if (value <= 0) throw new Error('Ln inválido');
+                    result = Math.log(value);
+                    break;
+                case 'log10':
+                    if (value <= 0) throw new Error('Log inválido');
+                    result = Math.log10(value);
+                    break;
+                
+                // Potências e raízes
+                case 'square':
+                case 'pow2':
+                    result = Math.pow(value, 2);
+                    break;
+                case 'cube':
+                case 'pow3':
+                    result = Math.pow(value, 3);
+                    break;
+                case 'sqrt':
+                case 'sqr-root':
+                    if (value < 0) throw new Error('Raiz negativa');
+                    result = Math.sqrt(value);
+                    break;
+                case 'cbrt':
+                case 'cbrt-root':
+                    result = Math.cbrt(value);
+                    break;
+                case 'power':
+                    this.handlePower();
+                    return;
+                case 'nthroot':
+                    this.handleNthRoot();
+                    return;
+                
+                // Exponenciais
+                case 'exp':
+                    result = Math.exp(value);
+                    break;
+                case '10x':
+                case '10pow':
+                    result = Math.pow(10, value);
+                    break;
+                
+                // Outros
+                case 'inv':
+                case 'reciprocal':
+                    if (value === 0) throw new Error('Divisão por zero');
+                    result = 1 / value;
+                    break;
+                case 'abs':
+                case 'abs-val':
+                    result = Math.abs(value);
+                    break;
+                case 'fact':
+                case 'factorial':
+                    result = this.factorial(value);
+                    break;
+                case 'floor':
+                    result = Math.floor(value);
+                    break;
+                case 'ceil':
+                    result = Math.ceil(value);
+                    break;
+                case 'mod':
+                    this.handleMod();
+                    return;
+                case 'deg-rad':
+                    this.toggleDegRad();
+                    return;
+                case 'pi':
+                    this.currentValue = Math.PI.toString();
+                    this.isNewInput = true;
+                    this.updateDisplay();
+                    return;
+                case 'e':
+                case 'constant-e':
+                    this.currentValue = Math.E.toString();
+                    this.isNewInput = true;
+                    this.updateDisplay();
+                    return;
+                
+                // Permutações e Combinações
+                case 'permutation':
+                    this.handlePermutation();
+                    return;
+                case 'combination':
+                    this.handleCombination();
+                    return;
+                
+                // Percent of
+                case 'percent-of':
+                    this.handlePercentOf();
+                    return;
+                
+                default:
+                    return;
+            }
+            
+            // Verifica resultado
+            if (isNaN(result) || !isFinite(result)) {
+                throw new Error('Resultado inválido');
+            }
+            
+            // Arredonda
+            result = Math.round(result * 1e12) / 1e12;
+            
+            const funcName = action.toUpperCase();
+            this.addHistory(`${funcName}(${this.formatDisplay(this.currentValue)})`, result);
+            
+            this.resultEl.classList.remove('animate');
+            void this.resultEl.offsetWidth;
+            this.resultEl.classList.add('animate');
+            
+            this.currentValue = result.toString();
+            this.isNewInput = true;
+            this.updateDisplay();
+            this.previewEl.textContent = `= ${result.toLocaleString('pt-BR', { maximumFractionDigits: 10 })}`;
+            
+        } catch (error) {
+            this.showError(error.message);
+        }
+    }
+    
+    degRadToRadians(degrees) {
+        return this.degRad ? degrees * (Math.PI / 180) : degrees;
+    }
+    
+    radiansToDeg(radians) {
+        return this.degRad ? radians * (180 / Math.PI) : radians;
+    }
+    
+    factorial(n) {
+        if (n < 0) throw new Error('Fatorial de negativo');
+        if (n !== Math.floor(n)) throw new Error('Fatorial só de inteiros');
+        if (n > 170) throw new Error('Valor muito grande');
+        if (n <= 1) return 1;
+        
+        let result = 1;
+        for (let i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
+    }
+    
+    // ===== FUNÇÕES AVANÇADAS =====
+    handlePower() {
+        const base = parseFloat(this.currentValue);
+        this.previousValue = this.currentValue;
+        this.operator = 'power';
+        this.expression = `pow(${this.formatDisplay(this.currentValue)},`;
+        this.isNewInput = true;
+        this.updateDisplay();
+    }
+    
+    handleNthRoot() {
+        const radicand = parseFloat(this.currentValue);
+        this.previousValue = this.currentValue;
+        this.operator = 'nthroot';
+        this.expression = `ⁿ√(${this.formatDisplay(this.currentValue)},`;
+        this.isNewInput = true;
+        this.updateDisplay();
+    }
+    
+    handleMod() {
+        if (this.operator && this.previousValue) {
+            const prev = parseFloat(this.previousValue);
+            const current = parseFloat(this.currentValue);
+            const result = prev % current;
+            this.currentValue = result.toString();
+            this.expression = `${this.formatDisplay(this.previousValue)} mod ${this.formatDisplay(this.currentValue)} =`;
+            this.previousValue = '';
+            this.operator = null;
+            this.isNewInput = true;
+            this.updateDisplay();
+        }
+    }
+    
+    handlePermutation() {
+        if (this.operator && this.previousValue) {
+            const n = parseFloat(this.previousValue);
+            const r = parseFloat(this.currentValue);
+            if (n < r) throw new Error('n < r');
+            const result = this.factorial(n) / this.factorial(n - r);
+            this.currentValue = result.toString();
+            this.expression = `P(${n}, ${r}) =`;
+            this.previousValue = '';
+            this.operator = null;
+            this.isNewInput = true;
+            this.updateDisplay();
+        }
+    }
+    
+    handleCombination() {
+        if (this.operator && this.previousValue) {
+            const n = parseFloat(this.previousValue);
+            const r = parseFloat(this.currentValue);
+            if (n < r) throw new Error('n < r');
+            const result = this.factorial(n) / (this.factorial(r) * this.factorial(n - r));
+            this.currentValue = result.toString();
+            this.expression = `C(${n}, ${r}) =`;
+            this.previousValue = '';
+            this.operator = null;
+            this.isNewInput = true;
+            this.updateDisplay();
+        }
+    }
+    
+    handlePercentOf() {
+        if (this.operator && this.previousValue) {
+            const total = parseFloat(this.previousValue);
+            const percent = parseFloat(this.currentValue);
+            const result = (total * percent) / 100;
+            this.currentValue = result.toString();
+            this.expression = `${this.formatDisplay(total)} ${percent}% =`;
+            this.previousValue = '';
+            this.operator = null;
+            this.isNewInput = true;
+            this.updateDisplay();
+        }
+    }
+    
+    toggleDegRad() {
+        this.degRad = !this.degRad;
+        this.degRadIndicator.textContent = this.degRad ? 'DEG' : 'RAD';
+        this.degRadIndicator.classList.toggle('active', this.degRad);
+    }
+    
+    addParenthesis(paren) {
+        if (paren === '(') {
+            if (!this.isNewInput && /\d$/.test(this.currentValue)) {
+                this.currentValue += '*(';
+            } else {
+                this.currentValue += '(';
+            }
+            this.bracketCount++;
+        } else {
+            this.currentValue += ')';
+            this.bracketCount--;
+        }
+        this.isNewInput = false;
+        this.updateDisplay();
+    }
+    
+    // ===== UTILIDADES =====
+    clear() {
+        this.currentValue = '0';
+        this.previousValue = '';
+        this.operator = null;
+        this.expression = '';
+        this.isNewInput = true;
+        this.previewEl.textContent = '';
+        this.updateDisplay();
+    }
+    
+    backspace() {
+        if (this.currentValue.length <= 1 || (this.currentValue.length === 2 && this.currentValue.startsWith('-'))) {
+            this.currentValue = '0';
+        } else {
+            this.currentValue = this.currentValue.slice(0, -1);
+        }
+        this.isNewInput = false;
+        this.updateDisplay();
+    }
+    
+    toggleSign() {
+        if (this.currentValue !== '0') {
+            this.currentValue = (parseFloat(this.currentValue) * -1).toString();
+            this.updateDisplay();
+        }
+    }
+    
+    percent() {
+        const value = parseFloat(this.currentValue);
+        if (this.operator && this.previousValue) {
+            const prev = parseFloat(this.previousValue);
+            this.currentValue = (prev * value / 100).toString();
+        } else {
+            this.currentValue = (value / 100).toString();
+        }
+        this.isNewInput = true;
+        this.updateDisplay();
+    }
+    
+    showError(message) {
+        this.resultEl.textContent = message;
+        this.resultEl.classList.add('error');
+        setTimeout(() => {
+            this.currentValue = '0';
+            this.updateDisplay();
+            this.resultEl.classList.remove('error');
+        }, 2000);
+    }
+    
+    // ===== MEMÓRIA =====
+    handleMemory(action) {
+        const current = parseFloat(this.currentValue);
+        
+        switch (action) {
+            case 'mc':
+                this.memory = 0;
+                this.memoryIndicator.classList.remove('active');
+                break;
+            case 'mr':
+                this.currentValue = this.memory.toString();
+                this.isNewInput = false;
+                this.updateDisplay();
+                break;
+            case 'm+':
+                this.memory += current;
+                this.memoryIndicator.classList.add('active');
+                break;
+            case 'm-':
+                this.memory -= current;
+                this.memoryIndicator.classList.add('active');
+                break;
+            case 'ms':
+                this.memory = current;
+                this.memoryIndicator.classList.add('active');
+                break;
+        }
+    }
+    
+    // ===== HISTÓRICO =====
+    addHistory(expression, result) {
+        const entry = {
+            expression,
+            result: parseFloat(result).toLocaleString('pt-BR', { maximumFractionDigits: 10 }),
+            rawResult: result,
+            time: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+        };
+        
+        this.history.unshift(entry);
+        if (this.history.length > 50) this.history.pop();
+        
+        localStorage.setItem('calcHistory', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+    
+    renderHistory() {
+        const list = document.getElementById('historyList');
+        
+        if (this.history.length === 0) {
+            list.innerHTML = `
+                <div class="empty-history">
+                    <i class="fas fa-clock"></i>
+                    <p>Nenhum cálculo ainda</p>
+                </div>
+            `;
+            return;
+        }
+        
+        list.innerHTML = this.history.map((entry, i) => `
+            <div class="history-item" data-index="${i}">
+                <div class="history-expression">${entry.expression}</div>
+                <div class="history-result">= ${entry.result}</div>
+                <div class="history-time">${entry.time}</div>
+            </div>
+        `).join('');
+        
+        // Evento de clique nos itens
+        list.querySelectorAll('.history-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const index = parseInt(item.dataset.index);
+                this.currentValue = this.history[index].rawResult.toString();
+                this.isNewInput = true;
+                this.updateDisplay();
+                this.closePanel('history');
+            });
+        });
+    }
+    
+    clearHistory() {
+        this.history = [];
+        localStorage.removeItem('calcHistory');
+        this.renderHistory();
+    }
+    
+    // ===== CONVERSOR DE UNIDADES =====
+    setupConverter() {
+        const units = {
+            length: {
+                name: 'Comprimento',
+                units: [
+                    { name: 'Milímetro (mm)', factor: 0.001 },
+                    { name: 'Centímetro (cm)', factor: 0.01 },
+                    { name: 'Metro (m)', factor: 1 },
+                    { name: 'Quilômetro (km)', factor: 1000 },
+                    { name: 'Polegada (in)', factor: 0.0254 },
+                    { name: 'Pé (ft)', factor: 0.3048 },
+                    { name: 'Jarda (yd)', factor: 0.9144 },
+                    { name: 'Milha (mi)', factor: 1609.344 }
+                ]
+            },
+            weight: {
+                name: 'Peso',
+                units: [
+                    { name: 'Miligrama (mg)', factor: 0.000001 },
+                    { name: 'Grama (g)', factor: 0.001 },
+                    { name: 'Quilograma (kg)', factor: 1 },
+                    { name: 'Tonelada (t)', factor: 1000 },
+                    { name: 'Onça (oz)', factor: 0.0283495 },
+                    { name: 'Libra (lb)', factor: 0.453592 }
+                ]
+            },
+            temperature: {
+                name: 'Temperatura',
+                units: [
+                    { name: 'Celsius (°C)', factor: 'C' },
+                    { name: 'Fahrenheit (°F)', factor: 'F' },
+                    { name: 'Kelvin (K)', factor: 'K' }
+                ]
+            },
+            area: {
+                name: 'Área',
+                units: [
+                    { name: 'mm²', factor: 0.000001 },
+                    { name: 'cm²', factor: 0.0001 },
+                    { name: 'm²', factor: 1 },
+                    { name: 'km²', factor: 1000000 },
+                    { name: 'Hectare (ha)', factor: 10000 },
+                    { name: 'Acre', factor: 4046.86 }
+                ]
+            },
+            volume: {
+                name: 'Volume',
+                units: [
+                    { name: 'Mililitro (mL)', factor: 0.001 },
+                    { name: 'Litro (L)', factor: 1 },
+                    { name: 'Metro cúbico (m³)', factor: 1000 },
+                    { name: 'Galão (US)', factor: 3.78541 },
+                    { name: 'Pinta (US)', factor: 0.473176 }
+                ]
+            },
+            speed: {
+                name: 'Velocidade',
+                units: [
+                    { name: 'm/s', factor: 1 },
+                    { name: 'km/h', factor: 0.277778 },
+                    { name: 'mph', factor: 0.44704 },
+                    { name: 'Nó (kn)', factor: 0.514444 }
+                ]
+            },
+            data: {
+                name: 'Dados',
+                units: [
+                    { name: 'Byte (B)', factor: 1 },
+                    { name: 'Kilobyte (KB)', factor: 1024 },
+                    { name: 'Megabyte (MB)', factor: 1048576 },
+                    { name: 'Gigabyte (GB)', factor: 1073741824 },
+                    { name: 'Terabyte (TB)', factor: 1099511627776 }
+                ]
+            }
+        };
+        
+        this.converterData = units;
+        this.populateConverter('length');
+    }
+    
+    populateConverter(category) {
+        const data = this.converterData[category];
+        const fromSelect = document.getElementById('fromUnit');
+        const toSelect = document.getElementById('toUnit');
+        
+        fromSelect.innerHTML = data.units.map((u, i) => 
+            `<option value="${i}" ${i === 0 ? 'selected' : ''}>${u.name}</option>`
+        ).join('');
+        
+        toSelect.innerHTML = data.units.map((u, i) => 
+            `<option value="${i}" ${i === 1 ? 'selected' : ''}>${u.name}</option>`
+        ).join('');
+        
+        this.convertUnits();
+    }
+    
+    changeConverterCategory(category) {
+        document.querySelectorAll('.conv-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.conv-tab[data-category="${category}"]`).classList.add('active');
+        this.converterCategory = category;
+        this.populateConverter(category);
+    }
+    
+    convertUnits() {
+        const value = parseFloat(document.getElementById('fromValue').value);
+        const fromIndex = parseInt(document.getElementById('fromUnit').value);
+        const toIndex = parseInt(document.getElementById('toUnit').value);
+        
+        if (isNaN(value)) {
+            document.getElementById('toValue').value = '';
+            return;
+        }
+        
+        let result;
+        
+        if (this.converterCategory === 'temperature') {
+            result = this.convertTemperature(value, fromIndex, toIndex);
+        } else {
+            const data = this.converterData[this.converterCategory];
+            const fromFactor = data.units[fromIndex].factor;
+            const toFactor = data.units[toIndex].factor;
+            result = (value * fromFactor) / toFactor;
+        }
+        
+        document.getElementById('toValue').value = parseFloat(result.toFixed(10));
+    }
+    
+    convertTemperature(value, from, to) {
+        const temps = ['C', 'F', 'K'];
+        const fromTemp = temps[from];
+        const toTemp = temps[to];
+        
+        if (fromTemp === toTemp) return value;
+        
+        // Converte para Celsius primeiro
+        let celsius;
+        switch (fromTemp) {
+            case 'C': celsius = value; break;
+            case 'F': celsius = (value - 32) * 5/9; break;
+            case 'K': celsius = value - 273.15; break;
+        }
+        
+        // Converte de Celsius para destino
+        switch (toTemp) {
+            case 'C': return celsius;
+            case 'F': return (celsius * 9/5) + 32;
+            case 'K': return celsius + 273.15;
+        }
+    }
+    
+    swapUnits() {
+        const fromSelect = document.getElementById('fromUnit');
+        const toSelect = document.getElementById('toUnit');
+        const temp = fromSelect.value;
+        fromSelect.value = toSelect.value;
+        toSelect.value = temp;
+        this.convertUnits();
+    }
+    
+    // ===== MODO PROGRAMADOR =====
+    changeBase(base) {
+        document.querySelectorAll('.base-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.base-btn[data-base="${base}"]`).classList.add('active');
+        this.progBase = base;
+        this.updateProgrammerDisplay();
+    }
+    
+    handleProgKey(btn) {
+        const action = btn.dataset.action;
+        const value = btn.dataset.value;
+        const op = btn.dataset.op;
+        
+        if (value) {
+            this.progExpression += value;
+        } else if (action === 'prog-clear') {
+            this.progExpression = '';
+            this.progValue = 0;
+        } else if (action === 'prog-back') {
+            this.progExpression = this.progExpression.slice(0, -1);
+        } else if (action === 'prog-op' && op) {
+            this.progExpression += ` ${op} `;
+        } else if (action === 'prog-calc') {
+            this.calculateProgrammer();
+        } else if (action === 'prog-shift-left') {
+            this.progValue = this.progValue << 1;
+            this.updateProgrammerDisplay();
+            return;
+        } else if (action === 'prog-shift-right') {
+            this.progValue = this.progValue >> 1;
+            this.updateProgrammerDisplay();
+            return;
+        } else if (action === 'prog-mod') {
+            this.progValue = this.progValue % parseInt(this.currentValue) || 0;
+            this.updateProgrammerDisplay();
+            return;
+        }
+        
+        // Atualiza display
+        document.getElementById('progExpression').textContent = this.progExpression;
+        this.progValue = parseInt(this.getValueFromExpression()) || this.progValue;
+        this.updateProgrammerDisplay();
+    }
+    
+    getValueFromExpression() {
+        try {
+            let expr = this.progExpression.toUpperCase()
+                .replace(/AND/g, '&')
+                .replace(/OR/g, '|')
+                .replace(/XOR/g, '^')
+                .replace(/NOT/g, '~');
+            
+            // Só avalia expressões bit-a-bit válidas
+            if (/^\d+\s*[\&\|\^]\s*\d+$/.test(expr)) {
+                const parts = expr.split(/\s*[\&\|\^]\s*/);
+                const a = parseInt(parts[0]);
+                const b = parseInt(parts[1]);
+                const operator = expr.match(/[\&\|\^]/)[0];
+                
+                switch (operator) {
+                    case '&': return a & b;
+                    case '|': return a | b;
+                    case '^': return a ^ b;
+                }
+            }
+            return parseInt(expr) || 0;
+        } catch {
+            return 0;
+        }
+    }
+    
+    calculateProgrammer() {
+        this.progValue = parseInt(this.getValueFromExpression()) || 0;
+        this.progExpression = '';
+        document.getElementById('progExpression').textContent = '=';
+        this.updateProgrammerDisplay();
+    }
+    
+    updateProgrammerDisplay() {
+        const val = this.progValue;
+        
+        document.getElementById('binValue').textContent = (val >>> 0).toString(2);
+        document.getElementById('octValue').textContent = (val >>> 0).toString(8);
+        document.getElementById('decValue').textContent = (val >>> 0).toString(10);
+        document.getElementById('hexValue').textContent = (val >>> 0).toString(16).toUpperCase();
+        
+        document.getElementById('progResult').textContent = (val >>> 0).toString(10);
+    }
+    
+    // ===== PAINÉIS =====
+    openPanel(panel) {
+        const overlay = document.getElementById(panel + 'Overlay');
+        overlay.classList.add('open');
+        
+        if (panel === 'programmer') {
+            this.updateProgrammerDisplay();
+        }
+    }
+    
+    closePanel(panel) {
+        const overlay = document.getElementById(panel + 'Overlay');
+        overlay.classList.remove('open');
+    }
+    
+    // ===== THEME =====
+    toggleTheme() {
+        document.body.classList.toggle('dark-theme');
+        const isDark = document.body.classList.contains('dark-theme');
+        localStorage.setItem('calcTheme', isDark ? 'dark' : 'light');
+        document.querySelector('#themeBtn i').className = isDark ? 'fas fa-sun' : 'fas fa-moon';
+    }
+    
+    // ===== TABS =====
+    switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+        
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        if (tab === 'basic') {
+            document.getElementById('basicContent').classList.add('active');
+            this.modeLabel.textContent = 'BÁSICA';
+        } else if (tab === 'scientific') {
+            document.getElementById('scientificContent').classList.add('active');
+            this.modeLabel.textContent = 'CIENTÍFICA';
+        } else if (tab === 'extra') {
+            document.getElementById('extraContent').classList.add('active');
+            this.modeLabel.textContent = 'EXTENDIDA';
+        }
+    }
+    
+    // ===== TECLADO =====
+    handleKeyboard(e) {
+        // Não processa se painel estiver aberto
+        if (document.querySelector('.panel-overlay.open')) return;
+        
+        const key = e.key;
+        
+        if (/\d/.test(key)) {
+            this.handleNumber(key);
+        } else if (key === '.') {
+            this.handleNumber('.');
+        } else if (key === '+') {
+            this.handleOperator('add');
+        } else if (key === '-') {
+            this.handleOperator('subtract');
+        } else if (key === '*') {
+            this.handleOperator('multiply');
+        } else if (key === '/') {
+            e.preventDefault();
+            this.handleOperator('divide');
+        } else if (key === 'Enter' || key === '=') {
+            e.preventDefault();
+            this.calculate();
+        } else if (key === 'Escape') {
+            this.clear();
+        } else if (key === 'Backspace') {
+            this.backspace();
+        } else if (key === '%') {
+            this.percent();
+        }
+    }
+}
+
+// ===== INICIALIZAÇÃO =====
+document.addEventListener('DOMContentLoaded', () => {
+    const calc = new Calculator();
+    
+    // Carrega tema salvo
+    const savedTheme = localStorage.getItem('calcTheme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-theme');
+        document.querySelector('#themeBtn i').className = 'fas fa-sun';
+    }
+    
+    // Liga botões de memória
+    document.querySelectorAll('.mem-btn').forEach(btn => {
+        btn.addEventListener('click', () => calc.handleMemory(btn.dataset.action));
+    });
+});
+
+    </script>
+</body>
+</html>
